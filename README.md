@@ -3,7 +3,9 @@
 
 ## In Game Captures
 -1
-    -<img src="readme_images\1.png">
+
+-<img src="readme_images\1.png" height="500">
 
 -2
-    -<img src="readme_images\2.png">
+
+-<img src="readme_images\2.png" height="500">
