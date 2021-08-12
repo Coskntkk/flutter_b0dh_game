@@ -60,7 +60,7 @@ class _b0dhState extends State<b0dh> {
 
   List<int> tileGrid = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   int score = 0;
-  int bestScore = 0;
+  //int bestScore = 0;
 
   void updateScore() {
     int sum = 0;
@@ -71,6 +71,14 @@ class _b0dhState extends State<b0dh> {
   }
 
   void spawnLetter() {
+    // Looks for max value on the grid
+    int maxTile = tileGrid.reduce(max);
+    int maxValue = 1;
+    if (maxTile >= 5) {
+      maxValue = maxTile - 4;
+    }
+
+    // Looks for empty tiles on the grid
     List<int> emptyTileIndex = [];
     for (var i = 0; i < 16; i++) {
       if (tileGrid[i] == 0) {
@@ -78,13 +86,17 @@ class _b0dhState extends State<b0dh> {
       }
     }
 
+    // Resets the game if there is no empty tile,
+    // Spawns one tile if there is at least one.
     if (emptyTileIndex.length == 0) {
       resetGame();
     } else {
       int randomIndex;
       setState(() {
+        // Spawns a tile with max -5 value of max tile
+        int randomValue = random.nextInt(maxValue) + 1;
         randomIndex = random.nextInt(emptyTileIndex.length);
-        tileGrid[emptyTileIndex[randomIndex]] += 1;
+        tileGrid[emptyTileIndex[randomIndex]] += randomValue;
       });
     }
 
@@ -93,9 +105,12 @@ class _b0dhState extends State<b0dh> {
 
   void resetGame() {
     setState(() {
+      /*
       if (score > bestScore) {
         bestScore = score;
-      }
+
+        /////////////// WRITING BEST SCORE INTO A FILE WILL BE HERE
+      }*/
       tileGrid = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       score = 0;
       gameStart = false;
@@ -103,146 +118,216 @@ class _b0dhState extends State<b0dh> {
   }
 
   void swipeLeft() {
-    // MERGING
+    // CHECK IF GRID CAN MOVE LEFT
+    int count = 0;
     for (var i = 1; i < 4; i++) {
       for (var j = 0; j <= 12; j += 4) {
         int index = i + j;
-        if (tileGrid[index] != 0 && tileGrid[index - 1] == tileGrid[index]) {
-          tileGrid[index - 1] = tileGrid[index] + 1;
-          tileGrid[index] = 0;
+        if ((tileGrid[index] != 0) &&
+            ((tileGrid[index - 1] == 0) ||
+                (tileGrid[index - 1] == tileGrid[index]))) {
+          count += 1;
         }
       }
     }
 
-    //SLIDING
-    for (var k = 0; k < 3; k++) {
+    // IF CAN GRID MOVE LEFT:
+    if (count > 0) {
+      // MERGING
       for (var i = 1; i < 4; i++) {
         for (var j = 0; j <= 12; j += 4) {
           int index = i + j;
-          if (tileGrid[index] != 0 && tileGrid[index - 1] == 0) {
-            tileGrid[index - 1] = tileGrid[index];
+          if (tileGrid[index] != 0 && tileGrid[index - 1] == tileGrid[index]) {
+            tileGrid[index - 1] = tileGrid[index] + 1;
             tileGrid[index] = 0;
           }
         }
       }
+
+      //SLIDING
+      for (var k = 0; k < 3; k++) {
+        for (var i = 1; i < 4; i++) {
+          for (var j = 0; j <= 12; j += 4) {
+            int index = i + j;
+            if (tileGrid[index] != 0 && tileGrid[index - 1] == 0) {
+              tileGrid[index - 1] = tileGrid[index];
+              tileGrid[index] = 0;
+            }
+          }
+        }
+      }
+      spawnLetter();
     }
   }
 
   void swipeUp() {
-    // MERGING
+    // CHECK IF GRID CAN MOVE UP
+
+    int count = 0;
     for (var i = 4; i < 8; i++) {
       for (var j = 0; j <= 8; j += 4) {
         int index = i + j;
-        if (tileGrid[index] != 0 && tileGrid[index - 4] == tileGrid[index]) {
-          tileGrid[index - 4] = tileGrid[index] + 1;
-          tileGrid[index] = 0;
+        if ((tileGrid[index] != 0) &&
+            ((tileGrid[index - 4] == 0) ||
+                (tileGrid[index - 4] == tileGrid[index]))) {
+          count += 1;
         }
       }
     }
 
-    //SLIDING
-    for (var k = 0; k < 3; k++) {
+    // IF CAN GRID MOVE UP:
+    if (count > 0) {
+      // MERGING
       for (var i = 4; i < 8; i++) {
         for (var j = 0; j <= 8; j += 4) {
           int index = i + j;
-          if (tileGrid[index] != 0 && tileGrid[index - 4] == 0) {
-            tileGrid[index - 4] = tileGrid[index];
+          if (tileGrid[index] != 0 && tileGrid[index - 4] == tileGrid[index]) {
+            tileGrid[index - 4] = tileGrid[index] + 1;
             tileGrid[index] = 0;
           }
         }
       }
+
+      //SLIDING
+      for (var k = 0; k < 3; k++) {
+        for (var i = 4; i < 8; i++) {
+          for (var j = 0; j <= 8; j += 4) {
+            int index = i + j;
+            if (tileGrid[index] != 0 && tileGrid[index - 4] == 0) {
+              tileGrid[index - 4] = tileGrid[index];
+              tileGrid[index] = 0;
+            }
+          }
+        }
+      }
+
+      spawnLetter();
     }
   }
 
   void swipeDown() {
-    // MERGING
-    for (var i = 8; i < 12; i++) {
+    // CHECK IF GRID CAN MOVE DOWN
+
+    int count = 0;
+    for (var i = 0; i < 4; i++) {
       for (var j = 0; j <= 8; j += 4) {
-        int index = i - j;
-        if (tileGrid[index] != 0 && tileGrid[index + 4] == tileGrid[index]) {
-          tileGrid[index + 4] = tileGrid[index] + 1;
-          tileGrid[index] = 0;
+        int index = i + j;
+        if ((tileGrid[index] != 0) &&
+            ((tileGrid[index + 4] == 0) ||
+                (tileGrid[index + 4] == tileGrid[index]))) {
+          count += 1;
         }
       }
     }
 
-    //SLIDING
-    for (var k = 0; k < 3; k++) {
+    // IF CAN GRID MOVE DOWN:
+    if (count > 0) {
+      // MERGING
       for (var i = 0; i < 4; i++) {
         for (var j = 0; j <= 8; j += 4) {
           int index = i + j;
-          if (tileGrid[index] != 0 && tileGrid[index + 4] == 0) {
-            tileGrid[index + 4] = tileGrid[index];
+          if (tileGrid[index] != 0 && tileGrid[index + 4] == tileGrid[index]) {
+            tileGrid[index + 4] = tileGrid[index] + 1;
             tileGrid[index] = 0;
           }
         }
       }
+
+      //SLIDING
+      for (var k = 0; k < 3; k++) {
+        for (var i = 0; i < 4; i++) {
+          for (var j = 0; j <= 8; j += 4) {
+            int index = i + j;
+            if (tileGrid[index] != 0 && tileGrid[index + 4] == 0) {
+              tileGrid[index + 4] = tileGrid[index];
+              tileGrid[index] = 0;
+            }
+          }
+        }
+      }
+
+      spawnLetter();
     }
   }
 
   void swipeRight() {
-    // MERGING
-    for (var i = 3; i <= 15; i += 4) {
-      for (var j = 0; j < 3; j++) {
-        int ind = i - j;
-        if (tileGrid[ind] != 0 && tileGrid[ind - 1] == tileGrid[ind]) {
-          tileGrid[ind - 1] = tileGrid[ind] + 1;
-          tileGrid[ind] = 0;
+    // CHECK IF GRID CAN MOVE RIGHT
+    int count = 0;
+    for (var i = 0; i < 3; i++) {
+      for (var j = 0; j <= 12; j += 4) {
+        int index = i + j;
+        if ((tileGrid[index] != 0) &&
+            ((tileGrid[index + 1] == 0) ||
+                (tileGrid[index + 1] == tileGrid[index]))) {
+          count += 1;
         }
       }
     }
 
-    // SLIDING
-    for (var k = 0; k < 3; k++) {
-      for (var i = 0; i < 3; i++) {
-        for (var j = 0; j <= 12; j += 4) {
-          int ind = i + j;
-          if (tileGrid[ind] != 0 && tileGrid[ind + 1] == 0) {
-            tileGrid[ind + 1] = tileGrid[ind];
+    // IF CAN GRID MOVE RIGHT:
+    if (count > 0) {
+      // MERGING
+      for (var i = 3; i <= 15; i += 4) {
+        for (var j = 0; j < 3; j++) {
+          int ind = i - j;
+          if (tileGrid[ind] != 0 && tileGrid[ind - 1] == tileGrid[ind]) {
+            tileGrid[ind - 1] = tileGrid[ind] + 1;
             tileGrid[ind] = 0;
           }
         }
       }
+
+      // SLIDING
+      for (var k = 0; k < 3; k++) {
+        for (var i = 0; i < 3; i++) {
+          for (var j = 0; j <= 12; j += 4) {
+            int ind = i + j;
+            if (tileGrid[ind] != 0 && tileGrid[ind + 1] == 0) {
+              tileGrid[ind + 1] = tileGrid[ind];
+              tileGrid[ind] = 0;
+            }
+          }
+        }
+      }
+
+      spawnLetter();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.orange.shade50,
+      color: bgColor,
       child: SafeArea(
-        child: GestureDetector(
-          onVerticalDragEnd: (details) {
-            if (details.velocity.pixelsPerSecond.dy < -250) {
-              //swipeUp();
-            } else if (details.velocity.pixelsPerSecond.dy > 250) {
-              //swipeDown();
-            }
-          },
-          onHorizontalDragEnd: (details) {
-            if (details.velocity.pixelsPerSecond.dx < -1000) {
-              //swipeLeft();
-            } else if (details.velocity.pixelsPerSecond.dx > 1000) {
-              //swipeRight();
-            }
-          },
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                      child: TextButton(
-                        onPressed: () {
-                          if (gameStart == false) {
-                            spawnLetter();
-                            updateScore();
-                            gameStart = true;
-                          }
-                        },
+        child: SizedBox.expand(
+          child: GestureDetector(
+            onVerticalDragEnd: (details) {
+              if (gameStart == true) {
+                if (details.velocity.pixelsPerSecond.dy < -250) {
+                  swipeUp();
+                } else if (details.velocity.pixelsPerSecond.dy > 250) {
+                  swipeDown();
+                }
+              }
+            },
+            onHorizontalDragEnd: (details) {
+              if (gameStart == true) {
+                if (details.velocity.pixelsPerSecond.dx < -1000) {
+                  swipeLeft();
+                } else if (details.velocity.pixelsPerSecond.dx > 1000) {
+                  swipeRight();
+                }
+              }
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Container(
                         child: Text(
                           "B0DH",
                           style: TextStyle(
@@ -251,336 +336,124 @@ class _b0dhState extends State<b0dh> {
                               color: dark),
                         ),
                       ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: dark,
-                      ),
-                      padding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                      child: Text(
-                        "SCORE\n$score",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange.shade50,
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: dark,
+                        ),
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        child: Text(
+                          "SCORE\n$score",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: bgColor,
+                          ),
                         ),
                       ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Color(0xff313131),
-                      ),
-                      padding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                      child: Text(
-                        "BEST\n$bestScore",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange.shade50,
+                      /* /// BEST SCORE BOX
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Color(0xff313131),
                         ),
-                      ),
-                    ),
-                  ],
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        child: Text(
+                          "BEST\n$bestScore",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange.shade50,
+                          ),
+                        ),
+                      ),*/
+                    ],
+                  ),
                 ),
-              ),
-              Center(
-                child: Text(
-                  "Join the numbers and get to the Z tile.\nPress B0DH to start!",
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: dark,
-                ),
-                margin: EdgeInsets.symmetric(horizontal: 10),
-                child: GridView.count(
-                  childAspectRatio: 1,
-                  primary: false,
-                  padding: EdgeInsets.all(10),
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  crossAxisCount: 4,
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    // TILES STARTS HERE ////////////////////////////////////////////////////////////////////////////
-                    // TILE 0
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[0]],
+                Center(
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        "Join the numbers and get to the Z tile.\n",
+                        textAlign: TextAlign.center,
                       ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[0]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 1
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[1]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[1]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 2
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[2]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[2]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 3
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[3]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[3]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 4
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[4]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[4]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 5
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[5]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[5]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 6
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[6]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[6]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 7
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[7]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[7]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 8
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[8]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[8]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 9
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[9]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[9]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 10
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[10]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[10]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 11
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[11]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[11]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 12
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[12]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[12]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 13
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[13]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[13]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 14
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[14]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[14]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                    // TILE 15
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: colorsList[tileGrid[15]],
-                      ),
-                      child: Center(
-                        child: Text("${letterList[tileGrid[15]]}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 32)),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                        color: dark, borderRadius: BorderRadius.circular(10)),
-                    child: TextButton(
-                      onPressed: () {
-                        if (gameStart) {
-                          setState(() {
-                            swipeLeft();
+                      Visibility(
+                        visible: gameStart == false,
+                        child: TextButton(
+                          onPressed: () {
                             spawnLetter();
-                          });
-                        }
-                      },
-                      child: Text("LEFT", style: TextStyle(color: bgColor)),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: dark, borderRadius: BorderRadius.circular(10)),
-                    child: TextButton(
-                      onPressed: () {
-                        if (gameStart) {
-                          swipeUp();
-                          spawnLetter();
-                        }
-                      },
-                      child: Text("UP", style: TextStyle(color: bgColor)),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: dark, borderRadius: BorderRadius.circular(10)),
-                    child: TextButton(
-                      onPressed: () {
-                        if (gameStart) {
-                          swipeDown();
-                          spawnLetter();
-                        }
-                      },
-                      child: Text("DOWN", style: TextStyle(color: bgColor)),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: dark, borderRadius: BorderRadius.circular(10)),
-                    child: TextButton(
-                      onPressed: () {
-                        if (gameStart) {
-                          swipeRight();
-                          spawnLetter();
-                        }
-                      },
-                      child: Text("RIGHT", style: TextStyle(color: bgColor)),
-                    ),
-                  ),
-                ],
-              ),
-              TextButton(
-                onPressed: () {
-                  resetGame();
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10), color: dark),
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Text(
-                      "RESTART",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.orange.shade50),
-                    ),
+                            updateScore();
+                            gameStart = true;
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                                color: dark,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Text(
+                              "START",
+                              style: TextStyle(
+                                  color: bgColor, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              )
-            ],
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: dark,
+                  ),
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  child: GridView.count(
+                    childAspectRatio: 1,
+                    primary: false,
+                    padding: EdgeInsets.all(10),
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    crossAxisCount: 4,
+                    shrinkWrap: true,
+                    children: [
+                      for (var i in liste)
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: colorsList[tileGrid[i]],
+                          ),
+                          child: Center(
+                            child: Text("${letterList[tileGrid[i]]}",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 32)),
+                          ),
+                        )
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    resetGame();
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10), color: dark),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 45),
+                      child: Text(
+                        "RESTART",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: bgColor, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),

@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.coskunatak.b0dh">
    <application
-        android:label="b0dh"
+        android:label="B0DH"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
