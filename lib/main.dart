@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 Random random = new Random();
+//var myFile = new File("lib/high_score.txt");
 
 void main() {
   return runApp(
@@ -24,7 +25,7 @@ class b0dh extends StatefulWidget {
 // ignore: camel_case_types
 class _b0dhState extends State<b0dh> {
   bool gameStart = false;
-  List<dynamic> liste = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+  List<int> liste = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
   List<String> letterList = [
     " ",
@@ -59,6 +60,7 @@ class _b0dhState extends State<b0dh> {
   Color dark = Color(0xff313131);
 
   List<int> tileGrid = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  List<int> lastGrid = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   int score = 0;
   //int bestScore = 0;
 
@@ -117,7 +119,18 @@ class _b0dhState extends State<b0dh> {
     });
   }
 
+  void getLastMove() {
+    setState(() {
+      for (var i = 0; i < tileGrid.length; i++) {
+        lastGrid[i] = tileGrid[i];
+      }
+    });
+  }
+
   void swipeLeft() {
+    // SAVE GRID TO USE IN UNDO
+    getLastMove();
+
     // CHECK IF GRID CAN MOVE LEFT
     int count = 0;
     for (var i = 1; i < 4; i++) {
@@ -161,6 +174,9 @@ class _b0dhState extends State<b0dh> {
   }
 
   void swipeUp() {
+    // SAVE GRID TO USE IN UNDO
+    getLastMove();
+
     // CHECK IF GRID CAN MOVE UP
 
     int count = 0;
@@ -206,6 +222,9 @@ class _b0dhState extends State<b0dh> {
   }
 
   void swipeDown() {
+    // SAVE GRID TO USE IN UNDO
+    getLastMove();
+
     // CHECK IF GRID CAN MOVE DOWN
 
     int count = 0;
@@ -251,6 +270,9 @@ class _b0dhState extends State<b0dh> {
   }
 
   void swipeRight() {
+    // SAVE GRID TO USE IN UNDO
+    getLastMove();
+
     // CHECK IF GRID CAN MOVE RIGHT
     int count = 0;
     for (var i = 0; i < 3; i++) {
@@ -293,6 +315,24 @@ class _b0dhState extends State<b0dh> {
       spawnLetter();
     }
   }
+
+  void undoMove() {
+    setState(() {
+      for (var i = 0; i < tileGrid.length; i++) {
+        tileGrid[i] = lastGrid[i];
+      }
+    });
+  }
+
+  /*
+  void readHighScore() {
+    new File('saves/high_score.txt').readAsString().then((String contents) {
+      setState(() {
+        score = int.parse(contents);
+      });
+    });
+  }
+  */
 
   @override
   Widget build(BuildContext context) {
@@ -433,24 +473,56 @@ class _b0dhState extends State<b0dh> {
                     ],
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    resetGame();
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10), color: dark),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15, horizontal: 45),
-                      child: Text(
-                        "RESTART",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: bgColor, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        resetGame();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: dark),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 45),
+                          child: Text(
+                            "RESTART",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: bgColor, fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    TextButton(
+                      onPressed: () {
+                        if (gameStart == true) {
+                          undoMove();
+                        }
+                        /*else if (gameStart == false) {
+                          readHighScore();
+                        }
+                        */
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: dark),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 45),
+                          child: Text(
+                            "UNDO",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: bgColor, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 )
               ],
             ),
