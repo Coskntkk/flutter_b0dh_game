@@ -8,6 +8,7 @@ Random random = new Random();
 void main() {
   return runApp(
     MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.orange.shade50,
         body: b0dh(),
