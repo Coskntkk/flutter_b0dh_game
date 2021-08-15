@@ -1,20 +1,66 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:splashscreen/splashscreen.dart';
 
 Random random = new Random();
 //var myFile = new File("lib/high_score.txt");
 
 void main() {
-  return runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: Colors.orange.shade50,
-        body: b0dh(),
+  runApp(new MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: new MyApp(),
+  ));
+}
+
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => new _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  Widget build(BuildContext context) {
+    return new SplashScreen(
+      seconds: 5,
+      navigateAfterSeconds: new b0dh(),
+      title: new Text(
+        'B0DH',
+        style: new TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 100.0,
+          color: Color(0xff313131),
+        ),
       ),
-    ),
-  );
+      backgroundColor: Colors.orange.shade50,
+      styleTextUnderTheLoader: new TextStyle(),
+      photoSize: 100.0,
+      onClick: () => print("Flutter Egypt"),
+      useLoader: false,
+    );
+  }
+}
+
+class Splash extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xe1f5fe).withOpacity(1.0),
+      body: Center(child: Image.asset('assets/splash.png')),
+    );
+  }
+}
+
+class Init {
+  Init._();
+  static final instance = Init._();
+
+  Future initialize() async {
+    // This is where you can initialize the resources needed by your app while
+    // the splash screen is displayed.  Remove the following example because
+    // delaying the user experience is a bad design practice!
+    await Future.delayed(Duration(seconds: 3));
+  }
 }
 
 // ignore: camel_case_types, must_be_immutable
@@ -40,7 +86,7 @@ class _b0dhState extends State<b0dh> {
     "H",
     "I",
     "J",
-    "K",
+    "K"
   ];
 
   List<Color> colorsList = [
@@ -73,6 +119,24 @@ class _b0dhState extends State<b0dh> {
     score = sum;
   }
 
+  bool checkGameOver() {
+    // Collects empty tiles into a list
+    List<int> emptyTileIndex = [];
+    for (var i = 0; i < 16; i++) {
+      if (tileGrid[i] == 0) {
+        emptyTileIndex.add(i);
+      }
+    }
+
+    // Resets the game if there is no empty tile,
+    if (emptyTileIndex.length == 0) {
+      resetGame();
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   void spawnLetter() {
     // Looks for max value on the grid
     int maxTile = tileGrid.reduce(max);
@@ -89,19 +153,14 @@ class _b0dhState extends State<b0dh> {
       }
     }
 
-    // Resets the game if there is no empty tile,
     // Spawns one tile if there is at least one.
-    if (emptyTileIndex.length == 0) {
-      resetGame();
-    } else {
-      int randomIndex;
-      setState(() {
-        // Spawns a tile with max -5 value of max tile
-        int randomValue = random.nextInt(maxValue) + 1;
-        randomIndex = random.nextInt(emptyTileIndex.length);
-        tileGrid[emptyTileIndex[randomIndex]] += randomValue;
-      });
-    }
+    int randomIndex;
+    setState(() {
+      // Spawns a tile with max -5 value of max tile
+      int randomValue = random.nextInt(maxValue) + 1;
+      randomIndex = random.nextInt(emptyTileIndex.length);
+      tileGrid[emptyTileIndex[randomIndex]] += randomValue;
+    });
 
     updateScore();
   }
@@ -337,63 +396,68 @@ class _b0dhState extends State<b0dh> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: bgColor,
-      child: SafeArea(
-        child: SizedBox.expand(
-          child: GestureDetector(
-            onVerticalDragEnd: (details) {
-              if (gameStart == true) {
-                if (details.velocity.pixelsPerSecond.dy < -250) {
-                  swipeUp();
-                } else if (details.velocity.pixelsPerSecond.dy > 250) {
-                  swipeDown();
-                }
-              }
-            },
-            onHorizontalDragEnd: (details) {
-              if (gameStart == true) {
-                if (details.velocity.pixelsPerSecond.dx < -1000) {
-                  swipeLeft();
-                } else if (details.velocity.pixelsPerSecond.dx > 1000) {
-                  swipeRight();
-                }
-              }
-            },
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      Container(
-                        child: Text(
-                          "B0DH",
-                          style: TextStyle(
-                              fontSize: 60,
-                              fontWeight: FontWeight.bold,
-                              color: dark),
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: dark,
-                        ),
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        child: Text(
-                          "SCORE\n$score",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: bgColor,
+    // Show splash screen while waiting for app resources to load:
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: Colors.orange.shade50,
+        body: Container(
+          color: bgColor,
+          child: SafeArea(
+            child: SizedBox.expand(
+              child: GestureDetector(
+                onVerticalDragEnd: (details) {
+                  if (gameStart == true) {
+                    if (details.velocity.pixelsPerSecond.dy < -250) {
+                      swipeUp();
+                    } else if (details.velocity.pixelsPerSecond.dy > 250) {
+                      swipeDown();
+                    }
+                  }
+                },
+                onHorizontalDragEnd: (details) {
+                  if (gameStart == true) {
+                    if (details.velocity.pixelsPerSecond.dx < -1000) {
+                      swipeLeft();
+                    } else if (details.velocity.pixelsPerSecond.dx > 1000) {
+                      swipeRight();
+                    }
+                  }
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Container(
+                            child: Text(
+                              "B0DH",
+                              style: TextStyle(
+                                  fontSize: 60,
+                                  fontWeight: FontWeight.bold,
+                                  color: dark),
+                            ),
                           ),
-                        ),
-                      ),
-                      /* /// BEST SCORE BOX
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: dark,
+                            ),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 20),
+                            child: Text(
+                              "SCORE\n$score",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: bgColor,
+                              ),
+                            ),
+                          ),
+                          /* /// BEST SCORE BOX
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
@@ -410,122 +474,128 @@ class _b0dhState extends State<b0dh> {
                           ),
                         ),
                       ),*/
-                    ],
-                  ),
-                ),
-                Center(
-                  child: Column(
-                    children: <Widget>[
-                      Text(
-                        "Join the numbers and get to the Z tile.\n",
-                        textAlign: TextAlign.center,
+                        ],
                       ),
-                      Visibility(
-                        visible: gameStart == false,
-                        child: TextButton(
+                    ),
+                    Center(
+                      child: Column(
+                        children: <Widget>[
+                          Text(
+                            "Join the numbers and get to the Z tile.\n",
+                            textAlign: TextAlign.center,
+                          ),
+                          Visibility(
+                            visible: gameStart == false,
+                            child: TextButton(
+                              onPressed: () {
+                                spawnLetter();
+                                updateScore();
+                                gameStart = true;
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(15),
+                                decoration: BoxDecoration(
+                                    color: dark,
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Text(
+                                  "START",
+                                  style: TextStyle(
+                                      color: bgColor,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: dark,
+                      ),
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      child: GridView.count(
+                        childAspectRatio: 1,
+                        primary: false,
+                        padding: EdgeInsets.all(10),
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        crossAxisCount: 4,
+                        shrinkWrap: true,
+                        children: [
+                          for (var i in liste)
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: colorsList[tileGrid[i]],
+                              ),
+                              child: Center(
+                                child: Text("${letterList[tileGrid[i]]}",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 32)),
+                              ),
+                            )
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton(
                           onPressed: () {
-                            spawnLetter();
-                            updateScore();
-                            gameStart = true;
+                            resetGame();
                           },
                           child: Container(
-                            padding: EdgeInsets.all(15),
                             decoration: BoxDecoration(
-                                color: dark,
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Text(
-                              "START",
-                              style: TextStyle(
-                                  color: bgColor, fontWeight: FontWeight.bold),
+                                borderRadius: BorderRadius.circular(10),
+                                color: dark),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 15, horizontal: 45),
+                              child: Text(
+                                "RESTART",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: bgColor,
+                                    fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: dark,
-                  ),
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  child: GridView.count(
-                    childAspectRatio: 1,
-                    primary: false,
-                    padding: EdgeInsets.all(10),
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    crossAxisCount: 4,
-                    shrinkWrap: true,
-                    children: [
-                      for (var i in liste)
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: colorsList[tileGrid[i]],
-                          ),
-                          child: Center(
-                            child: Text("${letterList[tileGrid[i]]}",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 32)),
-                          ),
-                        )
-                    ],
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        resetGame();
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: dark),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 15, horizontal: 45),
-                          child: Text(
-                            "RESTART",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: bgColor, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        if (gameStart == true) {
-                          undoMove();
-                        }
-                        /*else if (gameStart == false) {
+                        TextButton(
+                          onPressed: () {
+                            if (gameStart == true) {
+                              undoMove();
+                            }
+                            /*else if (gameStart == false) {
                           readHighScore();
                         }
                         */
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: dark),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 15, horizontal: 45),
-                          child: Text(
-                            "UNDO",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: bgColor, fontWeight: FontWeight.bold),
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: dark),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 15, horizontal: 45),
+                              child: Text(
+                                "UNDO",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: bgColor,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
+                      ],
+                    )
                   ],
-                )
-              ],
+                ),
+              ),
             ),
           ),
         ),
