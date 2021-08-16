@@ -121,15 +121,36 @@ class _b0dhState extends State<b0dh> {
 
   bool checkGameOver() {
     // Collects empty tiles into a list
-    List<int> emptyTileIndex = [];
+    int emptyTileCount = 0;
     for (var i = 0; i < 16; i++) {
       if (tileGrid[i] == 0) {
-        emptyTileIndex.add(i);
+        emptyTileCount++;
       }
     }
 
-    // Resets the game if there is no empty tile,
-    if (emptyTileIndex.length == 0) {
+    // Checks if grid can move
+    int totalMovable = 0;
+    // Check horizontal
+    for (var j = 0; j <= 12; j += 4) {
+      for (var i = 0; i < 3; i++) {
+        int index = i + j;
+        if (tileGrid[index] == tileGrid[index + 1]) {
+          totalMovable++;
+        }
+      }
+    }
+    // Check vertical
+    for (var j = 0; j <= 8; j += 4) {
+      for (var i = 0; i < 4; i++) {
+        int index = i + j;
+        if (tileGrid[index] == tileGrid[index + 4]) {
+          totalMovable++;
+        }
+      }
+    }
+
+    // Resets the game if there is no empty tile and no playable direction,
+    if (emptyTileCount == 0 && totalMovable == 0) {
       resetGame();
       return false;
     } else {
@@ -188,191 +209,206 @@ class _b0dhState extends State<b0dh> {
   }
 
   void swipeLeft() {
-    // SAVE GRID TO USE IN UNDO
-    getLastMove();
+    // IF GAME IS NOT OVER
+    if (checkGameOver() == true) {
+      // SAVE GRID TO USE IN UNDO
+      getLastMove();
 
-    // CHECK IF GRID CAN MOVE LEFT
-    int count = 0;
-    for (var i = 1; i < 4; i++) {
-      for (var j = 0; j <= 12; j += 4) {
-        int index = i + j;
-        if ((tileGrid[index] != 0) &&
-            ((tileGrid[index - 1] == 0) ||
-                (tileGrid[index - 1] == tileGrid[index]))) {
-          count += 1;
-        }
-      }
-    }
-
-    // IF CAN GRID MOVE LEFT:
-    if (count > 0) {
-      // MERGING
+      // CHECK IF GRID CAN MOVE LEFT
+      int count = 0;
       for (var i = 1; i < 4; i++) {
         for (var j = 0; j <= 12; j += 4) {
           int index = i + j;
-          if (tileGrid[index] != 0 && tileGrid[index - 1] == tileGrid[index]) {
-            tileGrid[index - 1] = tileGrid[index] + 1;
-            tileGrid[index] = 0;
+          if ((tileGrid[index] != 0) &&
+              ((tileGrid[index - 1] == 0) ||
+                  (tileGrid[index - 1] == tileGrid[index]))) {
+            count += 1;
           }
         }
       }
 
-      //SLIDING
-      for (var k = 0; k < 3; k++) {
+      // IF CAN GRID MOVE LEFT:
+      if (count > 0) {
+        // MERGING
         for (var i = 1; i < 4; i++) {
           for (var j = 0; j <= 12; j += 4) {
             int index = i + j;
-            if (tileGrid[index] != 0 && tileGrid[index - 1] == 0) {
-              tileGrid[index - 1] = tileGrid[index];
+            if (tileGrid[index] != 0 &&
+                tileGrid[index - 1] == tileGrid[index]) {
+              tileGrid[index - 1] = tileGrid[index] + 1;
               tileGrid[index] = 0;
             }
           }
         }
+
+        //SLIDING
+        for (var k = 0; k < 3; k++) {
+          for (var i = 1; i < 4; i++) {
+            for (var j = 0; j <= 12; j += 4) {
+              int index = i + j;
+              if (tileGrid[index] != 0 && tileGrid[index - 1] == 0) {
+                tileGrid[index - 1] = tileGrid[index];
+                tileGrid[index] = 0;
+              }
+            }
+          }
+        }
+        spawnLetter();
       }
-      spawnLetter();
     }
   }
 
   void swipeUp() {
-    // SAVE GRID TO USE IN UNDO
-    getLastMove();
+    // IF GAME IS NOT OVER
+    if (checkGameOver() == true) {
+      // SAVE GRID TO USE IN UNDO
+      getLastMove();
 
-    // CHECK IF GRID CAN MOVE UP
+      // CHECK IF GRID CAN MOVE UP
 
-    int count = 0;
-    for (var i = 4; i < 8; i++) {
-      for (var j = 0; j <= 8; j += 4) {
-        int index = i + j;
-        if ((tileGrid[index] != 0) &&
-            ((tileGrid[index - 4] == 0) ||
-                (tileGrid[index - 4] == tileGrid[index]))) {
-          count += 1;
-        }
-      }
-    }
-
-    // IF CAN GRID MOVE UP:
-    if (count > 0) {
-      // MERGING
+      int count = 0;
       for (var i = 4; i < 8; i++) {
         for (var j = 0; j <= 8; j += 4) {
           int index = i + j;
-          if (tileGrid[index] != 0 && tileGrid[index - 4] == tileGrid[index]) {
-            tileGrid[index - 4] = tileGrid[index] + 1;
-            tileGrid[index] = 0;
+          if ((tileGrid[index] != 0) &&
+              ((tileGrid[index - 4] == 0) ||
+                  (tileGrid[index - 4] == tileGrid[index]))) {
+            count += 1;
           }
         }
       }
 
-      //SLIDING
-      for (var k = 0; k < 3; k++) {
+      // IF CAN GRID MOVE UP:
+      if (count > 0) {
+        // MERGING
         for (var i = 4; i < 8; i++) {
           for (var j = 0; j <= 8; j += 4) {
             int index = i + j;
-            if (tileGrid[index] != 0 && tileGrid[index - 4] == 0) {
-              tileGrid[index - 4] = tileGrid[index];
+            if (tileGrid[index] != 0 &&
+                tileGrid[index - 4] == tileGrid[index]) {
+              tileGrid[index - 4] = tileGrid[index] + 1;
               tileGrid[index] = 0;
             }
           }
         }
-      }
 
-      spawnLetter();
+        //SLIDING
+        for (var k = 0; k < 3; k++) {
+          for (var i = 4; i < 8; i++) {
+            for (var j = 0; j <= 8; j += 4) {
+              int index = i + j;
+              if (tileGrid[index] != 0 && tileGrid[index - 4] == 0) {
+                tileGrid[index - 4] = tileGrid[index];
+                tileGrid[index] = 0;
+              }
+            }
+          }
+        }
+
+        spawnLetter();
+      }
     }
   }
 
   void swipeDown() {
-    // SAVE GRID TO USE IN UNDO
-    getLastMove();
+    // IF GAME IS NOT OVER
+    if (checkGameOver() == true) {
+      // SAVE GRID TO USE IN UNDO
+      getLastMove();
 
-    // CHECK IF GRID CAN MOVE DOWN
+      // CHECK IF GRID CAN MOVE DOWN
 
-    int count = 0;
-    for (var i = 0; i < 4; i++) {
-      for (var j = 0; j <= 8; j += 4) {
-        int index = i + j;
-        if ((tileGrid[index] != 0) &&
-            ((tileGrid[index + 4] == 0) ||
-                (tileGrid[index + 4] == tileGrid[index]))) {
-          count += 1;
-        }
-      }
-    }
-
-    // IF CAN GRID MOVE DOWN:
-    if (count > 0) {
-      // MERGING
+      int count = 0;
       for (var i = 0; i < 4; i++) {
         for (var j = 0; j <= 8; j += 4) {
           int index = i + j;
-          if (tileGrid[index] != 0 && tileGrid[index + 4] == tileGrid[index]) {
-            tileGrid[index + 4] = tileGrid[index] + 1;
-            tileGrid[index] = 0;
+          if ((tileGrid[index] != 0) &&
+              ((tileGrid[index + 4] == 0) ||
+                  (tileGrid[index + 4] == tileGrid[index]))) {
+            count += 1;
           }
         }
       }
 
-      //SLIDING
-      for (var k = 0; k < 3; k++) {
+      // IF CAN GRID MOVE DOWN:
+      if (count > 0) {
+        // MERGING
         for (var i = 0; i < 4; i++) {
           for (var j = 0; j <= 8; j += 4) {
             int index = i + j;
-            if (tileGrid[index] != 0 && tileGrid[index + 4] == 0) {
-              tileGrid[index + 4] = tileGrid[index];
+            if (tileGrid[index] != 0 &&
+                tileGrid[index + 4] == tileGrid[index]) {
+              tileGrid[index + 4] = tileGrid[index] + 1;
               tileGrid[index] = 0;
             }
           }
         }
-      }
 
-      spawnLetter();
+        //SLIDING
+        for (var k = 0; k < 3; k++) {
+          for (var i = 0; i < 4; i++) {
+            for (var j = 0; j <= 8; j += 4) {
+              int index = i + j;
+              if (tileGrid[index] != 0 && tileGrid[index + 4] == 0) {
+                tileGrid[index + 4] = tileGrid[index];
+                tileGrid[index] = 0;
+              }
+            }
+          }
+        }
+
+        spawnLetter();
+      }
     }
   }
 
   void swipeRight() {
-    // SAVE GRID TO USE IN UNDO
-    getLastMove();
+    // IF GAME IS NOT OVER
+    if (checkGameOver() == true) {
+      // SAVE GRID TO USE IN UNDO
+      getLastMove();
 
-    // CHECK IF GRID CAN MOVE RIGHT
-    int count = 0;
-    for (var i = 0; i < 3; i++) {
-      for (var j = 0; j <= 12; j += 4) {
-        int index = i + j;
-        if ((tileGrid[index] != 0) &&
-            ((tileGrid[index + 1] == 0) ||
-                (tileGrid[index + 1] == tileGrid[index]))) {
-          count += 1;
-        }
-      }
-    }
-
-    // IF CAN GRID MOVE RIGHT:
-    if (count > 0) {
-      // MERGING
-      for (var i = 3; i <= 15; i += 4) {
-        for (var j = 0; j < 3; j++) {
-          int ind = i - j;
-          if (tileGrid[ind] != 0 && tileGrid[ind - 1] == tileGrid[ind]) {
-            tileGrid[ind - 1] = tileGrid[ind] + 1;
-            tileGrid[ind] = 0;
+      // CHECK IF GRID CAN MOVE RIGHT
+      int count = 0;
+      for (var i = 0; i < 3; i++) {
+        for (var j = 0; j <= 12; j += 4) {
+          int index = i + j;
+          if ((tileGrid[index] != 0) &&
+              ((tileGrid[index + 1] == 0) ||
+                  (tileGrid[index + 1] == tileGrid[index]))) {
+            count += 1;
           }
         }
       }
 
-      // SLIDING
-      for (var k = 0; k < 3; k++) {
-        for (var i = 0; i < 3; i++) {
-          for (var j = 0; j <= 12; j += 4) {
-            int ind = i + j;
-            if (tileGrid[ind] != 0 && tileGrid[ind + 1] == 0) {
-              tileGrid[ind + 1] = tileGrid[ind];
+      // IF CAN GRID MOVE RIGHT:
+      if (count > 0) {
+        // MERGING
+        for (var i = 3; i <= 15; i += 4) {
+          for (var j = 0; j < 3; j++) {
+            int ind = i - j;
+            if (tileGrid[ind] != 0 && tileGrid[ind - 1] == tileGrid[ind]) {
+              tileGrid[ind - 1] = tileGrid[ind] + 1;
               tileGrid[ind] = 0;
             }
           }
         }
-      }
 
-      spawnLetter();
+        // SLIDING
+        for (var k = 0; k < 3; k++) {
+          for (var i = 0; i < 3; i++) {
+            for (var j = 0; j <= 12; j += 4) {
+              int ind = i + j;
+              if (tileGrid[ind] != 0 && tileGrid[ind + 1] == 0) {
+                tileGrid[ind + 1] = tileGrid[ind];
+                tileGrid[ind] = 0;
+              }
+            }
+          }
+        }
+
+        spawnLetter();
+      }
     }
   }
 
